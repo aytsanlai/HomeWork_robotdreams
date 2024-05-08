@@ -2,7 +2,8 @@
 using namespace std;
 
 int main() {
-    float first, float difference;
+    float first;
+    float difference;
     int last;
 
     cout << "Enter the first element of the arithmetic progression: ";
@@ -13,8 +14,8 @@ int main() {
     cin >> last;
 
     cout << "Result:" << endl;
-    for (int i = 0; i < last; ++i) {
-        float term = first + (i * difference);
+    for (unsigned int i = 0; i < last; ++i) {
+        const float term = first + (i * difference);
         cout << term << endl;
     }
 
