@@ -1,6 +1,5 @@
 #include <iostream>
 using namespace std;
-
 int fibonacci(int n) {
     if (n <= 1)
         return n;
@@ -15,7 +14,6 @@ int fibonacci(int n) {
 
 int main() {
     int position;
-
     cout << "Enter the position of the Fibonacci sequence element: ";
     cin >> position;
 
