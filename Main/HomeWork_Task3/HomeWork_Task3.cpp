@@ -23,8 +23,7 @@ int main() {
         return 1;
     }
 
-    int fact = factorial(number);
-    cout << "Factorial of " << number << " is: " << fact << endl;
+    cout << "Factorial of " << number << " is: " << factorial(number) << endl;
 
     return 0;
 }
