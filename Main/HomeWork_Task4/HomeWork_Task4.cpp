@@ -33,7 +33,7 @@ int main() {
     cout << "d) " << endl;
     for (int i = 0; i < size; ++i) {
         for (int j = 0; j < i; ++j) {
-            cout << "*";
+            cout << " ";
         }
         for (int j = 0; j < size; ++j) {
             cout << "*";
