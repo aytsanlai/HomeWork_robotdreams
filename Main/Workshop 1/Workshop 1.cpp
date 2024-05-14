@@ -4,20 +4,45 @@
 
 using namespace std;
 
-int determineWinner(char userChoice, char computerChoice) {
+enum class Symbol {
+    ROCK = 'r',
+    PAPER = 'p',
+    SCISSORS = 's'
+};
+
+enum class Result {
+    WIN,
+    LOSE,
+    DRAW
+};
+
+Result determineWinner(Symbol userChoice, Symbol computerChoice) {
     if (userChoice == computerChoice)
-        return 0;
-    if ((userChoice == 'r' && computerChoice == 's') || (userChoice == 'p' && computerChoice == 'r') || (userChoice == 's' && computerChoice == 'p'))
-        return 1;
-    return -1;
+        return Result::DRAW;
+    if ((userChoice == Symbol::ROCK && computerChoice == Symbol::SCISSORS) ||
+        (userChoice == Symbol::PAPER && computerChoice == Symbol::ROCK) ||
+        (userChoice == Symbol::SCISSORS && computerChoice == Symbol::PAPER))
+        return Result::WIN;
+    return Result::LOSE;
+}
+
+string symbolToString(Symbol symbol) {
+    switch (symbol) {
+    case Symbol::ROCK:
+        return "rock";
+    case Symbol::PAPER:
+        return "paper";
+    case Symbol::SCISSORS:
+        return "scissors";
+    }
 }
 
 int main() {
-    srand(time(0));
+    srand(time(nullptr));
 
     int rounds;
     int userWins = 0, computerWins = 0, draws = 0;
-    char symbols[] = { 'r', 'p', 's' };
+    constexpr char symbols[] = { 'r', 'p', 's' };
 
     cout << "Hello! Welcome to 'Rock paper scissors' game for 2 players." << endl;
 
@@ -27,32 +52,35 @@ int main() {
         if (rounds == -1)
             break;
 
-        for (int i = 0; i < rounds; ++i) {
-            char userChoice, computerChoice;
+        for (unsigned int i = 0; i < rounds; ++i) {
 
             cout << "To make your turn, enter one of possible symbols:\n";
             cout << "r - rock\n";
             cout << "p - paper\n";
             cout << "s - scissors\n";
             cout << "Your choice is ";
-            cin >> userChoice;
+            char userInput;
+            cin >> userInput;
 
-            int randomIndex = rand() % 3;
-            computerChoice = symbols[randomIndex];
-            cout << "PC choice is " << (char)toupper(computerChoice) << endl;
+            const auto userChoice = static_cast<Symbol>(userInput);
+            const auto computerChoice = static_cast<Symbol>(symbols[rand() % 3]);
 
-            int result = determineWinner(userChoice, computerChoice);
-            if (result == 1) {
+            cout << "PC choice is " << symbolToString(computerChoice) << endl;
+
+            const Result result = determineWinner(userChoice, computerChoice);
+            switch (result) {
+            case Result::WIN:
                 cout << "You WIN\n";
                 ++userWins;
-            }
-            else if (result == -1) {
+                break;
+            case Result::LOSE:
                 cout << "You LOST\n";
                 ++computerWins;
-            }
-            else {
+                break;
+            case Result::DRAW:
                 cout << "It's a draw\n";
                 ++draws;
+                break;
             }
         }
 
@@ -61,13 +89,9 @@ int main() {
         cout << "number of wins - " << userWins << endl;
         cout << "number of losses - " << computerWins << endl;
         cout << "number of draws - " << draws << endl;
-        if (userWins > computerWins)
-            cout << "--You're smarter than my PC algo!-" << endl;
+        if (userWins > computerWins) cout << "--You're smarter than my PC algo!-" << endl;
 
-        userWins = 0;
-        computerWins = 0;
-        draws = 0;
-
+        userWins = computerWins = draws = 0;
     } while (rounds != -1);
 
     cout << "BYE-BYE" << endl;
