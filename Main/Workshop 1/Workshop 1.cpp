@@ -34,6 +34,8 @@ string symbolToString(Symbol symbol) {
         return "paper";
     case Symbol::SCISSORS:
         return "scissors";
+    default:
+        return "unknown";
     }
 }
 
