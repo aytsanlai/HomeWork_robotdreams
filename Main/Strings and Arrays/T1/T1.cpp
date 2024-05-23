@@ -1,46 +1,48 @@
 #include <iostream>
+#include <array>
 #include <limits>
 
-using namespace std;
+#define SIZE_TYPE uint_fast8_t
 
-void translateArray(int numbers[], int size) {
-    for (int i = 0; i < size; ++i) {
-        if (numbers[i] > 0) {
-            numbers[i] *= 2;
+constexpr SIZE_TYPE SIZE = 10;
+
+void translateArray(std::array<int, SIZE>& numbers) {
+    for (auto& number : numbers) {
+        if (number > 0) {
+            number *= 2;
         }
-        else if (numbers[i] < 0) {
-            numbers[i] = 0;
+        else if (number < 0) {
+            number = 0;
         }
     }
 }
 
 int main() {
-    const int SIZE = 10;
-    int numbers[SIZE];
+    std::array<int, SIZE> numbers{};
 
-    cout << "Enter 10 integers for the array:" << endl;
+    std::cout << "Enter 10 integers for the array:" << std::endl;
 
-    for (int i = 0; i < SIZE; ++i) {
+    for (SIZE_TYPE i = 0; i < SIZE; ++i) {
         while (true) {
-            cout << "Element " << i + 1 << ": ";
-            if (cin >> numbers[i]) {
+            std::cout << "Element " << i + 1 << ": ";
+            if (std::cin >> numbers[i]) {
                 break;
             }
             else {
-                cout << "Invalid input. Please enter an integer." << endl;
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                std::cout << "Invalid input. Please enter an integer." << std::endl;
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             }
         }
     }
 
-    translateArray(numbers, SIZE);
+    translateArray(numbers);
 
-    cout << "Transformed array:" << endl;
-    for (int i = 0; i < SIZE; ++i) {
-        cout << numbers[i] << " ";
+    std::cout << "Transformed array:" << std::endl;
+    for (const auto number : numbers) {
+        std::cout << number << " ";
     }
-    cout << endl;
+    std::cout << std::endl;
 
     return 0;
 }

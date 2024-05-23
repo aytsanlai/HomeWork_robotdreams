@@ -1,16 +1,13 @@
-#include <cstring>
+#include <string>
 #include <cctype>
 #include <iostream>
 
-using namespace std;
-
-void countVowelsAndConsonants(const char str[], int& vowelsCount, int& consonantsCount) {
+void countVowelsAndConsonants(const std::string& str, unsigned int& vowelsCount, unsigned int& consonantsCount) {
     vowelsCount = 0;
     consonantsCount = 0;
-    int length = strlen(str);
-    for (int i = 0; i < length; ++i) {
-        char ch = tolower(str[i]);
-        if (isalpha(ch)) {
+    for (char ch : str) {
+        ch = static_cast<char>(std::tolower(ch));
+        if (static_cast<bool>(std::isalpha(ch))) {
             if (ch == 'a' || ch == 'e' || ch == 'i' || ch == 'o' || ch == 'u') {
                 ++vowelsCount;
             }
@@ -21,21 +18,20 @@ void countVowelsAndConsonants(const char str[], int& vowelsCount, int& consonant
     }
 }
 
-void displayCounts(int vowelsCount, int consonantsCount) {
-    cout << "Number of vowels: " << vowelsCount << endl;
-    cout << "Number of consonants: " << consonantsCount << endl;
+void displayCounts(const unsigned int vowelsCount, const unsigned int consonantsCount) {
+    std::cout << "Number of vowels: " << vowelsCount << std::endl;
+    std::cout << "Number of consonants: " << consonantsCount << std::endl;
 }
 
 int main() {
-    const int MAX_SIZE = 100;
-    char input[MAX_SIZE];
-    int vowels = 0, consonants = 0;
+    std::string  input;
+    unsigned int vowels = 0, consonants = 0;
 
-    cout << "Enter a string (max " << MAX_SIZE - 1 << " characters): ";
-    cin.getline(input, MAX_SIZE);
+    std::cout << "Enter a string: ";
+    std::getline(std::cin, input);
 
-    if (strlen(input) == 0) {
-        cout << "No input provided. Exiting..." << endl;
+    if (input.empty()) {
+        std::cout << "No input provided. Exiting." << std::endl;
         return 1;
     }
 

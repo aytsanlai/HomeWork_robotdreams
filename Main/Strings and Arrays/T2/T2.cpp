@@ -1,24 +1,24 @@
 #include <iostream>
-using namespace std;
+#include <string>
+#include <cctype>
 
-void toUppercase(char str[]) {
-    for (int i = 0; str[i] != '\0'; ++i) {
-        if (str[i] >= 'a' && str[i] <= 'z') {
-            str[i] -= 'a' - 'A';
+void toUppercase(std::string& str) {
+    for (char& ch : str) {
+        if (static_cast<bool>(std::islower(ch))) {
+            ch = static_cast<char>(std::toupper(ch));
         }
     }
 }
 
 int main() {
-    const int MAX_SIZE = 100;
-    char str[MAX_SIZE];
+    std::string str;
 
-    cout << "Enter a string: ";
-    cin.getline(str, MAX_SIZE);
+    std::cout << "Enter a string: ";
+    std::getline(std::cin, str);
 
     toUppercase(str);
 
-    cout << "Transformed string: " << str << endl;
+    std::cout << "Transformed string: " << str << std::endl;
 
     return 0;
 }
