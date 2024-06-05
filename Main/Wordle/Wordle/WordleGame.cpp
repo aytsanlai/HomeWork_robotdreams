@@ -5,10 +5,12 @@
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
+#include <unordered_set>
 
 WordleGame::WordleGame() : attempts(0), wordOfTheDayMode(false) {
     loadDatabase();
     currentDate = getCurrentDate();
+    srand(static_cast<unsigned int>(time(0)));
 }
 
 void WordleGame::start() {
@@ -44,16 +46,16 @@ void WordleGame::start() {
 
 std::string WordleGame::getCurrentDate() {
     time_t now = time(0);
-    tm* ltm = localtime(&now);
+    tm ltm;
+    localtime_s(&ltm, &now);
     std::ostringstream date;
-    date << std::setw(4) << std::setfill('0') << (1900 + ltm->tm_year)
-        << std::setw(2) << std::setfill('0') << (1 + ltm->tm_mon)
-        << std::setw(2) << std::setfill('0') << ltm->tm_mday;
+    date << std::setw(4) << std::setfill('0') << (1900 + ltm.tm_year)
+        << std::setw(2) << std::setfill('0') << (1 + ltm.tm_mon)
+        << std::setw(2) << std::setfill('0') << ltm.tm_mday;
     return date.str();
 }
 
 std::string WordleGame::getRandomWord() {
-    srand(static_cast<unsigned int>(time(0)));
     int randomIndex = rand() % database.size();
     return database[randomIndex];
 }
@@ -66,20 +68,24 @@ std::string WordleGame::getWordOfTheDay() {
 std::string WordleGame::compareWords(const std::string& guess) {
     std::string result = "*****";
     std::string tempTarget = targetWord;
+    std::unordered_multiset<char> unmatchedTargetChars;
 
     for (int i = 0; i < 5; ++i) {
         if (guess[i] == targetWord[i]) {
             result[i] = toupper(guess[i]);
-            tempTarget[i] = '*'; // Mark matched character to avoid duplicate matches
+            tempTarget[i] = '*';
+        }
+        else {
+            unmatchedTargetChars.insert(tempTarget[i]);
         }
     }
 
     for (int i = 0; i < 5; ++i) {
         if (result[i] == '*') {
-            size_t pos = tempTarget.find(guess[i]);
-            if (pos != std::string::npos) {
+            auto it = unmatchedTargetChars.find(guess[i]);
+            if (it != unmatchedTargetChars.end()) {
                 result[i] = tolower(guess[i]);
-                tempTarget[pos] = '*'; // Mark matched character to avoid duplicate matches
+                unmatchedTargetChars.erase(it);
             }
         }
     }
@@ -105,11 +111,19 @@ void WordleGame::markWordOfTheDayAsGuessed() {
 }
 
 bool WordleGame::isValidWord(const std::string& word) {
-    return validWords.find(word) != validWords.end();
+    return word.length() == 5;
 }
 
 void WordleGame::loadDatabase() {
-    database = { "HELLO", "COCON", "SPEAK", "CYCLE", "CHESS", "GAMES", "WORDS", "SMART", "CLEVER" };
+    database = {
+        "APPLE", "BERRY", "GAMER", "ELDER", "GRAPE", "HONEY", "EAGLE", "JUICE", "CANDY", "WHOLE", "STEAK",
+        "SEVEN", "LEMON", "MANGO", "ENEMY", "OLIVE", "PEACH", "SALAD", "CLOWN", "BREAD", "DOUGH", "KNIFE",
+        "FLOUR", "HERBS", "ICING", "JELLY", "LIVER", "PASTA", "ONION", "VALID", "HYPER", "IDEAL", "FAITH",
+        "CHILI", "CURRY", "DREAM", "FRUIT", "JUMBO", "LASER", "MINTS", "NOBLE", "PLUMB", "QUOTA", "RUMOR",
+        "YACHT", "ZEBRA", "CHEAP", "ENTRY", "FUNNY", "GLASS", "HORSE", "CLOCK", "SMILE", "TANGO", "UNCLE",
+        "MIXER", "NIGHT", "PEARL", "QUIET", "SUGAR", "TRUTH", "VEGAN", "WHEEL", "AHEAD", "BLOCK", "CRIME",
+        "CLEAR", "LUCKY", "MAGIC", "NEVER", "OASIS", "PIZZA", "MARCH", "RAVEN"
+    };
     validWords.insert(database.begin(), database.end());
 }
 
@@ -117,9 +131,9 @@ void WordleGame::displayMenu() const {
     std::cout << "============================\n";
     std::cout << "       Welcome to Wordle!\n";
     std::cout << "============================\n";
-    std::cout << "1 – Wordle of the day\n";
-    std::cout << "2 – Random Wordle\n";
-    std::cout << "0 – Exit\n";
+    std::cout << "1 - Wordle of the day\n";
+    std::cout << "2 - Random Wordle\n";
+    std::cout << "0 - Exit\n";
     std::cout << "Enter: ";
 }
 
@@ -136,8 +150,8 @@ void WordleGame::play() {
         std::cin >> guess;
         std::transform(guess.begin(), guess.end(), guess.begin(), ::toupper);
 
-        if (guess.length() != 5 || !isValidWord(guess)) {
-            std::cout << "Please enter a valid 5-letter word from the database.\n";
+        if (!isValidWord(guess)) {
+            std::cout << "Please enter a valid 5-letter word.\n";
             continue;
         }
 
