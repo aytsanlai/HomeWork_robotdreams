@@ -45,7 +45,7 @@ void WordleGame::start() {
 }
 
 std::string WordleGame::getCurrentDate() {
-    time_t now = time(0);
+    time_t now = time(nullptr);
     tm ltm;
     localtime_s(&ltm, &now);
     std::ostringstream date;
@@ -61,7 +61,7 @@ std::string WordleGame::getRandomWord() {
 }
 
 std::string WordleGame::getWordOfTheDay() {
-    time_t now = time(0);
+    time_t now = time(nullptr);
     int daysSinceEpoch = static_cast<int>(now / 86400);
     int index = daysSinceEpoch % database.size();
     return database[index];
@@ -113,7 +113,7 @@ void WordleGame::markWordOfTheDayAsGuessed() {
 }
 
 bool WordleGame::isValidWord(const std::string& word) {
-    return validWords.find(word) != validWords.end();
+    return word.length() == 5;
 }
 
 void WordleGame::loadDatabase(const std::string& filePath) {
@@ -124,10 +124,10 @@ void WordleGame::loadDatabase(const std::string& filePath) {
             std::transform(word.begin(), word.end(), word.begin(), ::toupper);
             if (word.length() == 5) {
                 database.push_back(word);
-                validWords.insert(word);
             }
         }
         file.close();
+        std::cout << "Loaded " << database.size() << " 5-letter words from the file." << std::endl;
     }
     else {
         std::cerr << "Error: Could not open the word list file." << std::endl;
