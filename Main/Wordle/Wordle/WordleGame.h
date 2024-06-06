@@ -1,5 +1,4 @@
 #pragma once
-#define WORDLEGAME_H
 
 #include <string>
 #include <vector>
@@ -9,26 +8,24 @@ class WordleGame {
 private:
     std::vector<std::string> database;
     std::string targetWord;
-    std::string currentDate;
     int attempts;
     bool wordOfTheDayMode;
     std::vector<std::string> pastAttempts;
-    std::unordered_set<std::string> validWords;
 
-    std::string getCurrentDate();
+    static uint_fast16_t getCurrentDate();
     std::string getRandomWord();
     std::string getWordOfTheDay();
     std::string compareWords(const std::string& guess);
-    bool isWordOfTheDayGuessed();
-    void markWordOfTheDayAsGuessed();
-    bool isValidWord(const std::string& word);
+    static bool isWordOfTheDayGuessed();
+    static void markWordOfTheDayAsGuessed();
+    static bool isValidWord(const std::string& word);
     void loadDatabase(const std::string& filePath);
-    void displayMenu() const;
+    static void displayMenu();
     void resetGame();
     void play();
     void displayPastAttempts() const;
 
 public:
-    WordleGame(const std::string& filePath);
+    explicit WordleGame(const std::string& filePath);
     void start();
 };

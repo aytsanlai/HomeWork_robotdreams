@@ -2,15 +2,14 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
-#include <algorithm>
-#include <iomanip>
-#include <sstream>
 #include <unordered_set>
+#include <algorithm>
+
+constexpr uint_fast8_t WORD_LENGTH = 5;
 
 WordleGame::WordleGame(const std::string& filePath) : attempts(0), wordOfTheDayMode(false) {
     loadDatabase(filePath);
-    currentDate = getCurrentDate();
-    srand(static_cast<unsigned int>(time(0)));
+    srand(static_cast<unsigned int>(time(nullptr)));
 }
 
 void WordleGame::start() {
@@ -44,35 +43,37 @@ void WordleGame::start() {
     }
 }
 
-std::string WordleGame::getCurrentDate() {
-    time_t now = time(nullptr);
-    tm ltm;
-    localtime_s(&ltm, &now);
-    std::ostringstream date;
-    date << std::setw(4) << std::setfill('0') << (1900 + ltm.tm_year)
-        << std::setw(2) << std::setfill('0') << (1 + ltm.tm_mon)
-        << std::setw(2) << std::setfill('0') << ltm.tm_mday;
-    return date.str();
+uint_fast16_t WordleGame::getCurrentDate() {
+    constexpr uint_fast8_t  SECONDS_IN_MINUTE = 60;
+    constexpr uint_fast8_t  MINUTES_IN_HOUR = 60;
+    constexpr uint_fast8_t  HOURS_IN_DAY = 24;
+    constexpr uint_fast32_t SECONDS_IN_DAY = SECONDS_IN_MINUTE * MINUTES_IN_HOUR * HOURS_IN_DAY;
+    std::time(nullptr);
+    const time_t now = time(nullptr);
+
+   
+    tm localTime{};
+    localtime_s( &localTime, &now);
+
+    return mktime(&localTime) / SECONDS_IN_DAY;
 }
 
 std::string WordleGame::getRandomWord() {
-    int randomIndex = rand() % database.size();
+    const size_t randomIndex = rand() % database.size();
     return database[randomIndex];
 }
 
 std::string WordleGame::getWordOfTheDay() {
-    time_t now = time(nullptr);
-    int daysSinceEpoch = static_cast<int>(now / 86400);
-    int index = daysSinceEpoch % database.size();
-    return database[index];
+    const uint_fast16_t todayIndex = WordleGame::getCurrentDate() % database.size();
+    return database[todayIndex];
 }
 
 std::string WordleGame::compareWords(const std::string& guess) {
-    std::string result = "*****";
-    std::string tempTarget = targetWord;
+    std::string                   result = "*****";
+    std::string                   tempTarget = targetWord;
     std::unordered_multiset<char> unmatchedTargetChars;
 
-    for (int i = 0; i < 5; ++i) {
+    for (uint_fast8_t i = 0; i < WORD_LENGTH; ++i) {
         if (guess[i] == targetWord[i]) {
             result[i] = toupper(guess[i]);
             tempTarget[i] = '*';
@@ -82,7 +83,7 @@ std::string WordleGame::compareWords(const std::string& guess) {
         }
     }
 
-    for (int i = 0; i < 5; ++i) {
+    for (uint_fast8_t i = 0; i < WORD_LENGTH; ++i) {
         if (result[i] == '*') {
             auto it = unmatchedTargetChars.find(guess[i]);
             if (it != unmatchedTargetChars.end()) {
@@ -96,10 +97,10 @@ std::string WordleGame::compareWords(const std::string& guess) {
 }
 
 bool WordleGame::isWordOfTheDayGuessed() {
-    std::ifstream file("word_of_the_day_status.txt");
+    std::ifstream file("word_of_the_day_status.txt", std::ios::binary);
     if (file.is_open()) {
-        std::string date;
-        file >> date;
+        uint_fast16_t date;
+        file.read(reinterpret_cast<char*>(&date), sizeof(date));
         file.close();
         return date == getCurrentDate();
     }
@@ -107,13 +108,16 @@ bool WordleGame::isWordOfTheDayGuessed() {
 }
 
 void WordleGame::markWordOfTheDayAsGuessed() {
-    std::ofstream file("word_of_the_day_status.txt");
-    file << getCurrentDate();
-    file.close();
+    std::ofstream file("word_of_the_day_status.txt", std::ios::binary | std::ios::trunc);
+    if (file.is_open()) {
+        uint_fast16_t date = getCurrentDate();
+        file.write(reinterpret_cast<const char*>(&date), sizeof(date));
+        file.close();
+    }
 }
 
 bool WordleGame::isValidWord(const std::string& word) {
-    return word.length() == 5;
+    return word.length() == WORD_LENGTH;
 }
 
 void WordleGame::loadDatabase(const std::string& filePath) {
@@ -122,19 +126,18 @@ void WordleGame::loadDatabase(const std::string& filePath) {
         std::string word;
         while (file >> word) {
             std::transform(word.begin(), word.end(), word.begin(), ::toupper);
-            if (word.length() == 5) {
+            if (word.length() == WORD_LENGTH) {
                 database.push_back(word);
             }
         }
         file.close();
-        std::cout << "Loaded " << database.size() << " 5-letter words from the file." << std::endl;
     }
     else {
         std::cerr << "Error: Could not open the word list file." << std::endl;
     }
 }
 
-void WordleGame::displayMenu() const {
+void WordleGame::displayMenu() {
     std::cout << "============================\n";
     std::cout << "       Welcome to Wordle!\n";
     std::cout << "============================\n";
