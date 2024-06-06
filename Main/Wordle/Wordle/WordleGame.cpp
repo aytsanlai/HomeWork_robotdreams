@@ -7,8 +7,8 @@
 #include <sstream>
 #include <unordered_set>
 
-WordleGame::WordleGame() : attempts(0), wordOfTheDayMode(false) {
-    loadDatabase();
+WordleGame::WordleGame(const std::string& filePath) : attempts(0), wordOfTheDayMode(false) {
+    loadDatabase(filePath);
     currentDate = getCurrentDate();
     srand(static_cast<unsigned int>(time(0)));
 }
@@ -61,7 +61,9 @@ std::string WordleGame::getRandomWord() {
 }
 
 std::string WordleGame::getWordOfTheDay() {
-    int index = std::hash<std::string>{}(currentDate) % database.size();
+    time_t now = time(0);
+    int daysSinceEpoch = static_cast<int>(now / 86400);
+    int index = daysSinceEpoch % database.size();
     return database[index];
 }
 
@@ -99,32 +101,37 @@ bool WordleGame::isWordOfTheDayGuessed() {
         std::string date;
         file >> date;
         file.close();
-        return date == currentDate;
+        return date == getCurrentDate();
     }
     return false;
 }
 
 void WordleGame::markWordOfTheDayAsGuessed() {
     std::ofstream file("word_of_the_day_status.txt");
-    file << currentDate;
+    file << getCurrentDate();
     file.close();
 }
 
 bool WordleGame::isValidWord(const std::string& word) {
-    return word.length() == 5;
+    return validWords.find(word) != validWords.end();
 }
 
-void WordleGame::loadDatabase() {
-    database = {
-        "APPLE", "BERRY", "GAMER", "ELDER", "GRAPE", "HONEY", "EAGLE", "JUICE", "CANDY", "WHOLE", "STEAK",
-        "SEVEN", "LEMON", "MANGO", "ENEMY", "OLIVE", "PEACH", "SALAD", "CLOWN", "BREAD", "DOUGH", "KNIFE",
-        "FLOUR", "HERBS", "ICING", "JELLY", "LIVER", "PASTA", "ONION", "VALID", "HYPER", "IDEAL", "FAITH",
-        "CHILI", "CURRY", "DREAM", "FRUIT", "JUMBO", "LASER", "MINTS", "NOBLE", "PLUMB", "QUOTA", "RUMOR",
-        "YACHT", "ZEBRA", "CHEAP", "ENTRY", "FUNNY", "GLASS", "HORSE", "CLOCK", "SMILE", "TANGO", "UNCLE",
-        "MIXER", "NIGHT", "PEARL", "QUIET", "SUGAR", "TRUTH", "VEGAN", "WHEEL", "AHEAD", "BLOCK", "CRIME",
-        "CLEAR", "LUCKY", "MAGIC", "NEVER", "OASIS", "PIZZA", "MARCH", "RAVEN"
-    };
-    validWords.insert(database.begin(), database.end());
+void WordleGame::loadDatabase(const std::string& filePath) {
+    std::ifstream file(filePath);
+    if (file.is_open()) {
+        std::string word;
+        while (file >> word) {
+            std::transform(word.begin(), word.end(), word.begin(), ::toupper);
+            if (word.length() == 5) {
+                database.push_back(word);
+                validWords.insert(word);
+            }
+        }
+        file.close();
+    }
+    else {
+        std::cerr << "Error: Could not open the word list file." << std::endl;
+    }
 }
 
 void WordleGame::displayMenu() const {

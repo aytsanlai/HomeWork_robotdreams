@@ -1,5 +1,4 @@
 #pragma once
-#ifndef WORDLEGAME_H
 #define WORDLEGAME_H
 
 #include <string>
@@ -23,15 +22,13 @@ private:
     bool isWordOfTheDayGuessed();
     void markWordOfTheDayAsGuessed();
     bool isValidWord(const std::string& word);
-    void loadDatabase();
+    void loadDatabase(const std::string& filePath);
     void displayMenu() const;
     void resetGame();
     void play();
     void displayPastAttempts() const;
 
 public:
-    WordleGame();
+    WordleGame(const std::string& filePath);
     void start();
 };
-
-#endif // WORDLEGAME_H
