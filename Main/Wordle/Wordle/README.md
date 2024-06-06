@@ -21,7 +21,9 @@ This program is a console-based implementation of the popular "Wordle" game. The
    - The main function handles user input, calls the comparison function, and tracks the number of attempts.
 
 ## Test Cases
-
+![alt text](image-6.png)
+![alt text](image-7.png)
+![alt text](image-8.png)
 ### Covered Test Cases
 
 1. **Basic Functionality:**

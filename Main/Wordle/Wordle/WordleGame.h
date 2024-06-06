@@ -1,3 +1,4 @@
+#pragma once
 #ifndef WORDLEGAME_H
 #define WORDLEGAME_H
 
