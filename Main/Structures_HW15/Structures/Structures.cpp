@@ -1,86 +1,63 @@
 #include <iostream>
 #include <algorithm>
-#include <string>
-#include <vector>
+#include <numeric>
+#include <array>
+
+constexpr size_t NUM_STUDENTS = 5;
+constexpr uint_fast8_t MARK_NUM = 4;
 
 struct Student {
     std::string name;
-    int marks[4];
+    std::array<unsigned int, MARK_NUM> marks{};
 };
 
 double calculateAverage(const Student& student) {
-    double sum = 0;
-    for (int mark : student.marks) {
-        sum += mark;
-    }
-    return sum / 4.0;
+    return std::accumulate(student.marks.begin(), student.marks.end(), 0.0) / MARK_NUM;
 }
 
-bool compareStudents(const Student& student1, const Student& student2) {
-    return calculateAverage(student1) > calculateAverage(student2);
+const Student* findBestStudent(const Student* const students, const size_t size) {
+    return size ? std::max_element(students, students + size, [](const Student& a, const Student& b) {
+        return calculateAverage(a) < calculateAverage(b);
+        }) : nullptr;
 }
 
-Student* findBestStudent(Student* students, unsigned size) {
-    if (size == 0) return nullptr;
-    Student* bestStudent = &students[0];
-    for (unsigned i = 1; i < size; ++i) {
-        if (calculateAverage(students[i]) > calculateAverage(*bestStudent)) {
-            bestStudent = &students[i];
-        }
-    }
-    return bestStudent;
+unsigned int countAboveAverage(const Student* const students, const size_t size, const double threshold) {
+    return std::count_if(students, students + size, [threshold](const Student& s) {
+        return calculateAverage(s) > threshold;
+        });
 }
 
-unsigned countAboveAverage(Student* students, unsigned size, double threshold) {
-    unsigned count = 0;
-    for (unsigned i = 0; i < size; ++i) {
-        if (calculateAverage(students[i]) > threshold) {
-            count++;
-        }
-    }
-    return count;
+void getBestStudents(const Student* const inStudents, const size_t inSize, Student* const outStudents, size_t& outSize, const unsigned int percent) {
+    outSize = std::min((percent * inSize) / 100, inSize);
+    std::partial_sort_copy(inStudents, inStudents + inSize, outStudents, outStudents + outSize, [](const Student& s1, const Student& s2) {
+        return calculateAverage(s1) > calculateAverage(s2);
+        });
 }
-
-void getBestStudents(Student* inStudents, unsigned inSize, Student* outStudents, unsigned& outSize, unsigned percent) {
-    unsigned count = (percent * inSize) / 100;
-    outSize = std::min(count, inSize);
-    std::sort(inStudents, inStudents + inSize, compareStudents);
-    std::copy(inStudents, inStudents + outSize, outStudents);
-}
-
 int main() {
-    const unsigned NUM_STUDENTS = 5;
-    Student students[NUM_STUDENTS] = {
-        {"1_Student", {90, 85, 95, 80}},
-        {"2_Student", {80, 75, 45, 90}},
-        {"3_Student", {95, 90, 85, 80}},
-        {"4_Student", {75, 80, 70, 85}},
-        {"5_Student", {35, 90, 80, 75}}
-    };
+    const std::array<Student, NUM_STUDENTS> students = { {
+                                                                { "1_Student", { 90, 85, 95, 80 } },
+                                                                { "2_Student", { 80, 75, 45, 90 } },
+                                                                { "3_Student", { 95, 90, 85, 80 } },
+                                                                { "4_Student", { 75, 80, 70, 85 } },
+                                                                { "5_Student", { 35, 90, 80, 75 } }
+                                                        } };
 
-    for (unsigned i = 0; i < NUM_STUDENTS; ++i) {
-        std::cout << students[i].name << "'s average: " << calculateAverage(students[i]) << std::endl;
-    }
+    for (const Student& student : students)
+        std::cout << student.name << "'s average: " << calculateAverage(student) << '\n';
 
-    std::sort(students, students + NUM_STUDENTS, compareStudents);
+    const Student* const bestStudent = findBestStudent(students.data(), students.size());
+    if (bestStudent) std::cout << "Best student: " << bestStudent->name << '\n';
 
-    Student* bestStudent = findBestStudent(students, NUM_STUDENTS);
-    if (bestStudent != nullptr) {
-        std::cout << "Best student: " << bestStudent->name << std::endl;
-    }
+    constexpr double threshold = 80.0;
+    const unsigned int aboveThreshold = countAboveAverage(students.data(), students.size(), threshold);
+    std::cout << "Number of students with average above " << threshold << ": " << aboveThreshold << '\n';
 
-    double threshold = 80.0;
-    unsigned aboveThreshold = countAboveAverage(students, NUM_STUDENTS, threshold);
-    std::cout << "Number of students with average above " << threshold << ": " << aboveThreshold << std::endl;
-
-    const unsigned N_PERCENT = 40;
-    unsigned outSize;
-    Student bestStudents[NUM_STUDENTS];
-    getBestStudents(students, NUM_STUDENTS, bestStudents, outSize, N_PERCENT);
-    std::cout << "Top " << N_PERCENT << "% students:" << std::endl;
-    for (unsigned i = 0; i < outSize; ++i) {
-        std::cout << bestStudents[i].name << std::endl;
-    }
+    constexpr unsigned int N_PERCENT = 40;
+    size_t outSize;
+    std::array<Student, NUM_STUDENTS> bestStudents;
+    getBestStudents(students.data(), students.size(), bestStudents.data(), outSize, N_PERCENT);
+    std::cout << "Top " << N_PERCENT << "% students:\n";
+    for (size_t i = 0; i < outSize; ++i) std::cout << bestStudents[i].name << '\n';
 
     return 0;
 }
