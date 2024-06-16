@@ -1,14 +1,14 @@
 #pragma once
 #include <string>
 
-enum class CoffeeType { ESPRESSO, LATTE, CAPPUCCINO };
+enum class CoffeeType: uint_fast8_t { ESPRESSO, LATTE, CAPPUCCINO };
 
 class Coffee {
 private:
     CoffeeType type;
-    int cost;
+    unsigned int cost;
 public:
-    Coffee(CoffeeType t);
+    explicit Coffee(CoffeeType t);
     void prepare() const;
-    int getCost() const;
+    [[nodiscard]] unsigned int getCost() const;
 };

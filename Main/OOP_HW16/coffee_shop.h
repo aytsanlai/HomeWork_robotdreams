@@ -2,16 +2,18 @@
 #include <string>
 #include "coffee.h"
 
-const int TABLES_COUNT = 10;
+#define TABLE_DSIZE uint_fast8_t
+
+constexpr TABLE_DSIZE TABLES_COUNT = 10;
 
 class CoffeeShop {
 private:
     std::string name;
-    bool m_Tables[TABLES_COUNT];
-    Coffee* m_Orders[TABLES_COUNT];
+    bool m_Tables[TABLES_COUNT]{};
+    Coffee* m_Orders[TABLES_COUNT]{};
 
 public:
-    CoffeeShop(const std::string& shopName);
+    explicit CoffeeShop(std::string  shopName);
 
     int takePlace();
 

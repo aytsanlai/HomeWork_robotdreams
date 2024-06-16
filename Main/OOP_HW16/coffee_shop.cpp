@@ -1,15 +1,16 @@
 #include "coffee_shop.h"
 #include <iostream>
+#include <utility>
 
-CoffeeShop::CoffeeShop(const std::string& shopName) : name(shopName) {
-    for (int i = 0; i < TABLES_COUNT; ++i) {
+CoffeeShop::CoffeeShop(std::string shopName) : name(std::move(shopName)) {
+    for (TABLE_DSIZE i = 0; i < TABLES_COUNT; ++i) {
         m_Tables[i] = false;
         m_Orders[i] = nullptr;
     }
 }
 
 int CoffeeShop::takePlace() {
-    for (int i = 0; i < TABLES_COUNT; ++i) {
+    for (TABLE_DSIZE i = 0; i < TABLES_COUNT; ++i) {
         if (!m_Tables[i]) {
             m_Tables[i] = true;
             return i;
@@ -27,8 +28,8 @@ void CoffeeShop::order(int tableNumber) {
     std::cout << "Choose a coffee type:\n";
     std::cout << "1. Espresso\n";
     std::cout << "2. Latte\n";
-    std::cout << "3. Cappuccino\n";
-    int choice;
+    std::cout << "3. Cappuccino" << std::endl;
+    unsigned int choice;
     std::cin >> choice;
 
     CoffeeType type;

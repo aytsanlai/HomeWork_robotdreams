@@ -16,23 +16,19 @@ Coffee::Coffee(CoffeeType t) : type(t) {
 }
 
 void Coffee::prepare() const {
-    std::string coffeeName;
     switch (type) {
     case CoffeeType::ESPRESSO:
-        coffeeName = "Espresso";
-        std::cout << "Preparing " << coffeeName << ": Water, Coffee, Time: 2 minutes\n";
+        std::cout << "Preparing Espresso: Water, Coffee, Time: 2 minutes" << std::endl;
         break;
     case CoffeeType::LATTE:
-        coffeeName = "Latte";
-        std::cout << "Preparing " << coffeeName << ": Water, Coffee, Milk, Time: 2,5 minutes\n";
+        std::cout << "Preparing Latte: Water, Coffee, Milk, Time: 2,5 minutes" << std::endl;
         break;
     case CoffeeType::CAPPUCCINO:
-        coffeeName = "Cappuccino";
-        std::cout << "Preparing " << coffeeName << ": Water, Coffee, Milk, Foam, Time: 3,75 minutes\n";
+        std::cout << "Preparing Cappuccino: Water, Coffee, Milk, Foam, Time: 3,75 minutes" << std::endl;
         break;
     }
 }
 
-int Coffee::getCost() const {
+unsigned int Coffee::getCost() const {
     return cost;
 }

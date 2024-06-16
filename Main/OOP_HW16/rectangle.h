@@ -8,6 +8,6 @@ private:
 public:
     Rectangle();
     Rectangle(float l, float h);
-    float getArea() const;
-    float getPerimeter() const;
+    [[nodiscard]] float getArea() const;
+    [[nodiscard]] float getPerimeter() const;
 };
