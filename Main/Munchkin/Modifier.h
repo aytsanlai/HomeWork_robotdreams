@@ -1,5 +1,4 @@
-#ifndef MODIFIER_H
-#define MODIFIER_H
+#pragma once
 
 #include <string>
 
@@ -10,6 +9,5 @@ public:
 
 private:
     std::string name;
+    std::string getName() const;
 };
-
-#endif
