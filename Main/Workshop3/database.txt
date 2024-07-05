@@ -1,0 +1,14 @@
+Monster;Bahamut;1
+Monster;Cactuar;2
+Monster;Tonberry;3
+Monster;Chocobo;4
+Monster;Leviathan;5
+Monster;Odin;10
+Monster;Ifrit;15
+Monster;Shiva;20
+Item;Holy Grenade;4
+Item;Masamune;5
+Item;Excalibur;8
+Item;Ultima Weapon;10
+Modifier;Doppelganger;Double_Bonus
+Modifier;Well Trained;Add_One
