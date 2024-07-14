@@ -1,4 +1,6 @@
 #pragma once
+
 #include "drink.h"
 
-Drink* createDrink(DrinkType type, SizeType size);
+Drink* createCoffee(CoffeeType type, SizeType size);
+Drink* createTea(TeaType type, SizeType size);

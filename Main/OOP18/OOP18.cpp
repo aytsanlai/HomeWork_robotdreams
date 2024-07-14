@@ -1,5 +1,6 @@
 #include <iostream>
 #include "drink_shop.h"
+#include "drink_factory.h"
 
 int main() {
     CoffeeShop shop("CoffeeBreak");

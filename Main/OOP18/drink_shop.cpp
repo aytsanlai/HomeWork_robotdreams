@@ -38,9 +38,6 @@ void CoffeeShop::order(int tableNumber) {
     unsigned int drinkChoice;
     std::cin >> drinkChoice;
 
-    DrinkType type;
-    SizeType size = SizeType::NONE;
-
     if (drinkChoice == 1) {
         std::cout << "Choose a coffee type:\n";
         std::cout << "1. Espresso\n";
@@ -50,30 +47,33 @@ void CoffeeShop::order(int tableNumber) {
         unsigned int coffeeChoice;
         std::cin >> coffeeChoice;
 
+        CoffeeType type;
+        SizeType size = SizeType::NONE;
+
         switch (coffeeChoice) {
         case 1:
-            type = DrinkType::ESPRESSO;
+            type = CoffeeType::ESPRESSO;
             size = SizeType::NONE;
             break;
         case 2:
-            type = DrinkType::AMERICANO;
+            type = CoffeeType::AMERICANO;
             break;
         case 3:
-            type = DrinkType::LATTE;
+            type = CoffeeType::LATTE;
             break;
         case 4:
-            type = DrinkType::CAPPUCCINO;
+            type = CoffeeType::CAPPUCCINO;
             break;
         default:
             std::cout << "Invalid choice.\n";
             return;
         }
 
-        if (type != DrinkType::ESPRESSO) {
+        if (type != CoffeeType::ESPRESSO) {
             std::cout << "Choose a size:\n";
             std::cout << "1. M\n";
             std::cout << "2. L\n";
-            if (type != DrinkType::CAPPUCCINO) {
+            if (type != CoffeeType::CAPPUCCINO) {
                 std::cout << "3. XL\n";
             }
             unsigned int sizeChoice;
@@ -87,7 +87,7 @@ void CoffeeShop::order(int tableNumber) {
                 size = SizeType::L;
                 break;
             case 3:
-                if (type != DrinkType::CAPPUCCINO) {
+                if (type != CoffeeType::CAPPUCCINO) {
                     size = SizeType::XL;
                 }
                 else {
@@ -100,6 +100,8 @@ void CoffeeShop::order(int tableNumber) {
                 return;
             }
         }
+
+        m_Orders[tableNumber] = createCoffee(type, size);
     }
     else if (drinkChoice == 2) {
         std::cout << "Choose a tea type:\n";
@@ -108,12 +110,15 @@ void CoffeeShop::order(int tableNumber) {
         unsigned int teaChoice;
         std::cin >> teaChoice;
 
+        TeaType type;
+        SizeType size = SizeType::NONE;
+
         switch (teaChoice) {
         case 1:
-            type = DrinkType::BLACK_TEA;
+            type = TeaType::BLACK_TEA;
             break;
         case 2:
-            type = DrinkType::GREEN_TEA;
+            type = TeaType::GREEN_TEA;
             break;
         default:
             std::cout << "Invalid choice.\n";
@@ -137,30 +142,45 @@ void CoffeeShop::order(int tableNumber) {
             std::cout << "Invalid size choice.\n";
             return;
         }
+
+        m_Orders[tableNumber] = createTea(type, size);
     }
     else {
         std::cout << "Invalid drink choice.\n";
         return;
     }
 
-    m_Orders[tableNumber] = createDrink(type, size);
+    std::cout << "Order placed for table " << tableNumber << ".\n";
 }
 
 bool CoffeeShop::prepare(int tableNumber) {
-    if (tableNumber < 0 || tableNumber >= TABLES_COUNT || !m_Tables[tableNumber] || m_Orders[tableNumber] == nullptr) {
+    if (tableNumber < 0 || tableNumber >= TABLES_COUNT) {
+        std::cout << "Invalid table number.\n";
         return false;
     }
+
+    if (m_Orders[tableNumber] == nullptr) {
+        std::cout << "No order for table " << tableNumber << ".\n";
+        return false;
+    }
+
+    std::cout << "Preparing drink for table " << tableNumber << ".\n";
     m_Orders[tableNumber]->prepare();
     return true;
 }
 
 bool CoffeeShop::getReceipt(int tableNumber) {
-    if (tableNumber < 0 || tableNumber >= TABLES_COUNT || !m_Tables[tableNumber] || m_Orders[tableNumber] == nullptr) {
+    if (tableNumber < 0 || tableNumber >= TABLES_COUNT) {
+        std::cout << "Invalid table number.\n";
         return false;
     }
-    std::cout << "Total cost: " << m_Orders[tableNumber]->getCost() << " credits\n";
-    delete m_Orders[tableNumber];
-    m_Orders[tableNumber] = nullptr;
-    m_Tables[tableNumber] = false;
+
+    if (m_Orders[tableNumber] == nullptr) {
+        std::cout << "No order for table " << tableNumber << ".\n";
+        return false;
+    }
+
+    std::cout << "Receipt for table " << tableNumber << ":\n";
+    std::cout << "Drink cost: $" << m_Orders[tableNumber]->getCost() << std::endl;
     return true;
 }

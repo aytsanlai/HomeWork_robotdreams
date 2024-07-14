@@ -2,7 +2,7 @@
 #include <string>
 #include "drink.h"
 
-using TableSizeType = uint_fast8_t;
+using TableSizeType = uint8_t;
 
 constexpr TableSizeType TABLES_COUNT = 10;
 
