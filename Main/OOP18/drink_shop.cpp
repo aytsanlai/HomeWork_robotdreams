@@ -3,8 +3,7 @@
 #include <iostream>
 #include <utility>
 
-CoffeeShop::CoffeeShop(std::string shopName) {
-    name = std::move(shopName);
+CoffeeShop::CoffeeShop(std::string shopName) : name(std::move(shopName)){
     for (TableSizeType i = 0; i < TABLES_COUNT; ++i) {
         m_Tables[i] = false;
         m_Orders[i] = nullptr;

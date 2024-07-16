@@ -5,7 +5,7 @@
 int main() {
     CoffeeShop shop("CoffeeBreak");
 
-    int table = shop.takePlace();
+    const int table = shop.takePlace();
     if (table != -1) {
         std::cout << "Table " << table << " is occupied.\n";
         shop.order(table);
