@@ -9,7 +9,7 @@ AIMoveBestRouteComponent::AIMoveBestRouteComponent(GameObject* referenceObject, 
 #ifdef DEBUG_VERTEX
     m_text.setFont(FontManager::getInstance().getDefaultFont());
 
-    m_text.setCharacterSize(48); // in pixels, not points!
+    m_text.setCharacterSize(48); 
     m_text.setFillColor(sf::Color::Blue);
     m_text.setOrigin(m_text.getGlobalBounds().getSize().x / 2, m_text.getGlobalBounds().getSize().y / 2);
 #endif
