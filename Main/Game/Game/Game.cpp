@@ -18,15 +18,18 @@ void swap(Tile* p1, Tile* p2) {
     grid[p2->row][p2->col] = p2;
 }
 
+
 int main() {
     srand(time(0));
 
     RenderWindow app(VideoMode(1780, 960), "Match-3 Game!");
-    app.setFramerateLimit(60);
+    app.setFramerateLimit(100);
 
     Texture t1;
     t1.loadFromFile("images/background.png");
     Sprite background(t1);
+
+    const Vector2i offset((app.getSize().x - GAME_SIZE * TILE_SIZE) / 2, (app.getSize().y - GAME_SIZE * TILE_SIZE) / 2);
 
     // Initialize grid with random tiles
     for (int row = 0; row < GAME_SIZE; row++) {
