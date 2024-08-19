@@ -1,41 +1,65 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <cstdint>
+#include <string>
+#include <memory>
 
-const int ts = 54; // Tile size
+constexpr int TILE_SIZE = 54; // Tile size
+
+enum class TileType : std::uint_fast8_t {
+    Red,
+    Blue,
+    Green,
+    Yellow
+};
 
 class Tile {
 public:
-    int x, y, col, row, match, alpha;
-    sf::Texture texture;
-    sf::Sprite sprite;
-
-    Tile();
-    virtual void loadTexture() = 0;
-    void setPosition(int col, int row);
+    Tile(int row, int col, const std::string& textureFile, TileType type, int width = TILE_SIZE, int height = TILE_SIZE);
     virtual ~Tile() = default;
+
+    // Delete copy constructor and copy assignment operator
+    Tile(const Tile&) = delete;
+    Tile& operator=(const Tile&) = delete;
+
+    // Default move constructor and move assignment operator
+    Tile(Tile&&) noexcept = default;
+    Tile& operator=(Tile&&) noexcept = default;
+
+    void setPosition(int row, int col) noexcept;
+    sf::Sprite& getSprite() noexcept;
+    TileType getType() const noexcept;
+    bool operator==(const Tile& other) const noexcept;
+    void setSize(int width, int height);
+
+    int x = 0, y = 0, col = 0, row = 0, alpha = 255;
+    sf::Sprite sprite;
+    bool isMatched = false;
+
+private:
+    void loadTexture(const std::string& textureFile);
+
+    std::unique_ptr<sf::Texture> texture;
+    TileType type;
 };
 
 class RedTile : public Tile {
 public:
-    RedTile();
-    void loadTexture() override;
+    explicit RedTile(int row, int col);
 };
 
 class BlueTile : public Tile {
 public:
-    BlueTile();
-    void loadTexture() override;
+    explicit BlueTile(int row, int col);
 };
 
 class GreenTile : public Tile {
 public:
-    GreenTile();
-    void loadTexture() override;
+    explicit GreenTile(int row, int col);
 };
 
 class YellowTile : public Tile {
 public:
-    YellowTile();
-    void loadTexture() override;
+    explicit YellowTile(int row, int col);
 };
