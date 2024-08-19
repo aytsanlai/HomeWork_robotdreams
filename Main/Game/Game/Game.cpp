@@ -13,11 +13,27 @@ Tile* grid[8][8];
 void swap(Tile* p1, Tile* p2) {
     std::swap(p1->col, p2->col);
     std::swap(p1->row, p2->row);
-//    std::swap(p1, p2);
     grid[p1->row][p1->col] = p1;
     grid[p2->row][p2->col] = p2;
 }
 
+void handleMerging(int row, int col) {
+    // Check for merging conditions
+    if (row + 1 < GAME_SIZE && row - 1 >= 0 && *grid[row][col] == *grid[row + 1][col] && *grid[row][col] == *grid[row - 1][col]) {
+        // Merge tiles
+        grid[row][col]->merge();
+        grid[row + 1][col]->isMatched = true;
+        grid[row - 1][col]->isMatched = true;
+        grid[row][col]->animateMerge();
+    }
+    if (col + 1 < GAME_SIZE && col - 1 >= 0 && *grid[row][col] == *grid[row][col + 1] && *grid[row][col] == *grid[row][col - 1]) {
+        // Merge tiles
+        grid[row][col]->merge();
+        grid[row][col + 1]->isMatched = true;
+        grid[row][col - 1]->isMatched = true;
+        grid[row][col]->animateMerge();
+    }
+}
 
 int main() {
     srand(time(0));
@@ -65,13 +81,10 @@ int main() {
             if (e.type == Event::KeyPressed) {
                 if (e.key.code == Keyboard::Escape) {
                     app.close();
-
-
                 }
             }
 
             if (e.type == Event::MouseButtonPressed && e.mouseButton.button == Mouse::Left) {
-//                std::cout << "Mouse Position" << (Mouse::getPosition(app) - offset).x << " " << (Mouse::getPosition(app) - offset).y << std::endl;
                 pos = Mouse::getPosition(app) - offset;
                 static constexpr unsigned int maxFieldSize = GAME_SIZE * TILE_SIZE;
                 if (!isSwap && !isMoving && pos.x > 0 && pos.y > 0 && pos.x < maxFieldSize &&
@@ -87,7 +100,6 @@ int main() {
         } else if (click == 2) {
             colB = pos.x / TILE_SIZE;
             rowB = pos.y / TILE_SIZE;
-            std::cout << "colA: " << colA << " rowA: " << rowA << " colB: " << colB << " rowB: " << rowB << std::endl;
             if (abs(colB - colA) + abs(rowB - rowA) == 1) {
                 swap(grid[rowA][colA], grid[rowB][colB]);
                 isSwap = true;
@@ -97,16 +109,10 @@ int main() {
             }
         }
 
-        //Match finding
+        // Match finding and merging
         for (int row = 0; row < GAME_SIZE; row++)
             for (int col = 0; col < GAME_SIZE; col++) {
-                if (row + 1 < GAME_SIZE && *grid[row][col] == *grid[row + 1][col])
-                    if (row - 1 >= 0 && *grid[row][col] == *grid[row - 1][col])
-                        for (int n = -1; n <= 1; n++) grid[row + n][col]->isMatched = true;
-
-                if (col + 1 < GAME_SIZE && *grid[row][col] == *grid[row][col + 1])
-                    if (col - 1 >= 0 && *grid[row][col] == *grid[row][col - 1])
-                        for (int n = -1; n <= 1; n++) grid[row][col + n]->isMatched = true;
+                handleMerging(row, col);
             }
 
         // Moving animation

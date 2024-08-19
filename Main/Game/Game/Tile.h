@@ -16,7 +16,7 @@ enum class TileType : std::uint_fast8_t {
 
 class Tile {
 public:
-    Tile(int row, int col, const std::string& textureFile, TileType type, int width = TILE_SIZE, int height = TILE_SIZE);
+    Tile(int row, int col, const std::string& textureFile, TileType type, int width = TILE_SIZE, int height = TILE_SIZE, int level = 1);
     virtual ~Tile() = default;
 
     // Delete copy constructor and copy assignment operator
@@ -32,13 +32,17 @@ public:
     TileType getType() const noexcept;
     bool operator==(const Tile& other) const noexcept;
     void setSize(int width, int height);
+    void merge(); // New method to handle merging
+    void animateMerge(); // New method to handle merge animation
 
     int x = 0, y = 0, col = 0, row = 0, alpha = 255;
     sf::Sprite sprite;
     bool isMatched = false;
+    int level = 1; // New level variable
 
 private:
     void loadTexture(const std::string& textureFile);
+    std::string levelToTextureFile() const; // Method to get texture file based on level
 
     std::unique_ptr<sf::Texture> texture;
     TileType type;
@@ -46,20 +50,20 @@ private:
 
 class RedTile : public Tile {
 public:
-    explicit RedTile(int row, int col);
+    explicit RedTile(int row, int col, int level = 1);
 };
 
 class BlueTile : public Tile {
 public:
-    explicit BlueTile(int row, int col);
+    explicit BlueTile(int row, int col, int level = 1);
 };
 
 class GreenTile : public Tile {
 public:
-    explicit GreenTile(int row, int col);
+    explicit GreenTile(int row, int col, int level = 1);
 };
 
 class YellowTile : public Tile {
 public:
-    explicit YellowTile(int row, int col);
+    explicit YellowTile(int row, int col, int level = 1);
 };
