@@ -1,4 +1,6 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <cstdint>
 #include <time.h>
 #include <iostream>
@@ -73,7 +75,23 @@ int main() {
     Vector2i pos;
     bool isSwap = false, isMoving = false;
 
-    while (app.isOpen()) {
+    // Moves mechanic
+    sf::Font font;
+    sf::Text movesText;
+    int movesLeft = 5; // Initial number of moves
+
+    if (!font.loadFromFile("Font/BALOO2-SEMIBOLD.TTF")) {
+        // error...
+        return -1;
+    }
+
+    movesText.setFont(font);
+    movesText.setString("Moves: " + std::to_string(movesLeft));
+    movesText.setCharacterSize(24); // in pixels, not points!
+    movesText.setFillColor(sf::Color::White);
+    movesText.setPosition(10, 10); // Top-left corner
+
+    while (app.isOpen() && movesLeft > 0) { // Check if moves are left
         Event e;
         while (app.pollEvent(e)) {
             if (e.type == Event::Closed)
@@ -105,6 +123,8 @@ int main() {
                 swap(grid[rowA][colA], grid[rowB][colB]);
                 isSwap = true;
                 click = 0;
+                movesLeft--; // Decrease the moves counter
+                movesText.setString("Moves: " + std::to_string(movesLeft)); // Update the text
             }
             else {
                 click = 1;
@@ -204,6 +224,7 @@ int main() {
         // Drawing
         app.clear();
         app.draw(background);
+        app.draw(movesText); // Draw the moves text
         for (int row = 0; row < GAME_SIZE; row++) {
             for (int col = 0; col < GAME_SIZE; col++) {
                 Tile* p = grid[row][col];
@@ -215,5 +236,24 @@ int main() {
 
         app.display();
     }
+
+    // If the game ends because of no moves left, display a message
+    if (movesLeft <= 0) {
+        sf::Text gameOverText;
+        gameOverText.setFont(font);
+        gameOverText.setString("Game Over! No moves left.");
+        gameOverText.setCharacterSize(48);
+        gameOverText.setFillColor(sf::Color::Red);
+        gameOverText.setPosition(app.getSize().x / 2 - gameOverText.getLocalBounds().width / 2, app.getSize().y / 2 - gameOverText.getLocalBounds().height / 2);
+
+        app.clear();
+        app.draw(background);
+        app.draw(gameOverText);
+        app.display();
+
+        // Wait for a few seconds before closing the window
+        sf::sleep(sf::seconds(3));
+    }
+
     return 0;
 }
