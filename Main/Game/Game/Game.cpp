@@ -9,12 +9,14 @@
 #include <random> // Include for std::default_random_engine and std::shuffle
 #include "Tile.h"
 #include "TaskManager.h"
+#include "SoundManager.h" // Include the SoundManager header
 
 using namespace sf;
 
 constexpr uint_fast8_t GAME_SIZE = 8;
 Tile* grid[GAME_SIZE][GAME_SIZE];
 TaskManager taskManager;
+SoundManager soundManager; // Declare a global SoundManager instance
 
 void swap(Tile* p1, Tile* p2) {
     std::swap(p1->col, p2->col);
@@ -31,6 +33,7 @@ void handleMerging(int row, int col) {
         grid[row + 1][col]->isMatched = true;
         grid[row - 1][col]->isMatched = true;
         grid[row][col]->animateMerge();
+        soundManager.playMergeSound(); // Play merge sound
     }
     if (col + 1 < GAME_SIZE && col - 1 >= 0 && *grid[row][col] == *grid[row][col + 1] && *grid[row][col] == *grid[row][col - 1]) {
         // Merge tiles
@@ -38,6 +41,7 @@ void handleMerging(int row, int col) {
         grid[row][col + 1]->isMatched = true;
         grid[row][col - 1]->isMatched = true;
         grid[row][col]->animateMerge();
+        soundManager.playMergeSound(); // Play merge sound
     }
 }
 
@@ -128,7 +132,7 @@ int main() {
 
     // Set position and scale for shuffle button
     const Vector2f shuffleButtonPosition(app.getSize().x - shuffleTexture.getSize().x * 0.5f - 10, 10);
-    const Vector2f shuffleButtonScale(0.25f, 0.25f); 
+    const Vector2f shuffleButtonScale(0.25f, 0.25f);
     shuffleButton.setPosition(shuffleButtonPosition);
     shuffleButton.setScale(shuffleButtonScale);
     shuffleButton.setPosition(225, 75);
@@ -210,6 +214,7 @@ int main() {
                 if (shuffleButton.getGlobalBounds().contains(static_cast<Vector2f>(Mouse::getPosition(app)))) {
                     reshuffleGrid();
                     isReshuffling = true;
+                    soundManager.playClickSound(); // Play click sound
                 }
             }
         }
@@ -228,6 +233,7 @@ int main() {
                 click = 0;
                 movesLeft--; // Decrease the moves counter
                 movesText.setString("Moves: " + std::to_string(movesLeft)); // Update the text
+                soundManager.playClickSound(); // Play click sound
             }
             else {
                 click = 1;
