@@ -352,6 +352,14 @@ int main() {
             if (allTilesInPlace) isReshuffling = false;
         }
 
+        // Check for game over or game won conditions
+        if (movesLeft <= 0 && !gameOver && !gameWon) {
+            gameOver = true;
+        }
+        if (taskManager.isTaskCompleted() && !gameOver && !gameWon) {
+            gameWon = true;
+        }
+
         // Drawing
         app.clear();
         if (gameOver) {
@@ -372,31 +380,11 @@ int main() {
                     app.draw(p->sprite);
                 }
             }
-            app.draw(shuffleButton); // Draw the reshuffle button
+            if (!gameOver && !gameWon) {
+                app.draw(shuffleButton); // Draw the reshuffle button
+            }
         }
-
-        if (gameOver) {
-            sf::Text gameOverText;
-            gameOverText.setFont(font);
-            gameOverText.setString("Game Over! No moves left. Press 'R' to restart.");
-            gameOverText.setCharacterSize(50);
-            gameOverText.setFillColor(sf::Color::Red);
-            gameOverText.setPosition(app.getSize().x / 2 - gameOverText.getLocalBounds().width / 2, app.getSize().y / 2 - gameOverText.getLocalBounds().height / 2);
-            app.draw(gameOverText);
-        }
-
-        if (gameWon) {
-            sf::Text gameWonText;
-            gameWonText.setFont(font);
-            gameWonText.setString("Congratulations! You won the game. Press 'R' to restart.");
-            gameWonText.setCharacterSize(50);
-            gameWonText.setFillColor(sf::Color::Green);
-            gameWonText.setPosition(app.getSize().x / 2 - gameWonText.getLocalBounds().width / 2, app.getSize().y / 2 - gameWonText.getLocalBounds().height / 2);
-            app.draw(gameWonText);
-        }
-
         app.display();
     }
-
     return 0;
 }
