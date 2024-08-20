@@ -2,7 +2,7 @@
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <cstdint>
-#include <time.h>
+#include <ctime>
 #include <iostream>
 #include "Tile.h"
 #include "TaskManager.h"
@@ -277,15 +277,15 @@ int main() {
         }
         else {
             app.draw(background);
-        }
-        app.draw(movesText); // Draw the moves text
-        taskManager.draw(app, font, Vector2f(app.getSize().x - 400, 10)); // Draw the task text and sprite on the right
-        for (int row = 0; row < GAME_SIZE; row++) {
-            for (int col = 0; col < GAME_SIZE; col++) {
-                Tile* p = grid[row][col];
-                p->sprite.setColor(Color(255, 255, 255, p->alpha));
-                p->sprite.setPosition(p->x + offset.x, p->y + offset.y);
-                app.draw(p->sprite);
+            app.draw(movesText); // Draw the moves text
+            taskManager.draw(app, font, Vector2f(app.getSize().x - 400, 10)); // Draw the task text and sprite on the right
+            for (int row = 0; row < GAME_SIZE; row++) {
+                for (int col = 0; col < GAME_SIZE; col++) {
+                    Tile* p = grid[row][col];
+                    p->sprite.setColor(Color(255, 255, 255, p->alpha));
+                    p->sprite.setPosition(p->x + offset.x, p->y + offset.y);
+                    app.draw(p->sprite);
+                }
             }
         }
 
