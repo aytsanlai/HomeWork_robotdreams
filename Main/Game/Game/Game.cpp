@@ -4,6 +4,9 @@
 #include <cstdint>
 #include <ctime>
 #include <iostream>
+#include <algorithm> // For std::shuffle
+#include <vector>
+#include <random> // Include for std::default_random_engine and std::shuffle
 #include "Tile.h"
 #include "TaskManager.h"
 
@@ -65,19 +68,70 @@ void restartGame(RenderWindow& app, Font& font, int& movesLeft) {
     taskManager.setTask(TileType::Red, 3, "images/NewNodes/Stage3/FrogP.png");
 }
 
+void reshuffleGrid() {
+    std::vector<Tile*> tiles;
+    for (int row = 0; row < GAME_SIZE; row++) {
+        for (int col = 0; col < GAME_SIZE; col++) {
+            tiles.push_back(grid[row][col]);
+        }
+    }
+    std::shuffle(tiles.begin(), tiles.end(), std::default_random_engine(std::time(0)));
+    for (int i = 0; i < tiles.size(); i++) {
+        int row = i / GAME_SIZE;
+        int col = i % GAME_SIZE;
+        tiles[i]->row = row;
+        tiles[i]->col = col;
+        tiles[i]->y = -TILE_SIZE * (GAME_SIZE - row); // Start from above the screen
+        grid[row][col] = tiles[i];
+    }
+
+    // Randomize tile types after reshuffling
+    for (int row = 0; row < GAME_SIZE; row++) {
+        for (int col = 0; col < GAME_SIZE; col++) {
+            const unsigned int TileType = rand() % 4;
+            switch (TileType) {
+            case 0:
+                delete grid[row][col];
+                grid[row][col] = new RedTile(row, col);
+                break;
+            case 1:
+                delete grid[row][col];
+                grid[row][col] = new BlueTile(row, col);
+                break;
+            case 2:
+                delete grid[row][col];
+                grid[row][col] = new GreenTile(row, col);
+                break;
+            case 3:
+                delete grid[row][col];
+                grid[row][col] = new YellowTile(row, col);
+                break;
+            }
+        }
+    }
+}
+
 int main() {
     srand(time(0));
 
     RenderWindow app(VideoMode(1780, 960), "Match-3 Game!");
     app.setFramerateLimit(100);
 
-    Texture t1, gameOverTexture, gameWonTexture;
+    Texture t1, gameOverTexture, gameWonTexture, shuffleTexture;
     t1.loadFromFile("images/background.png");
     gameOverTexture.loadFromFile("images/game_over_background.png"); // New background for game over
     gameWonTexture.loadFromFile("images/game_won_background.png"); // New background for game won
-    Sprite background(t1), gameOverBackground(gameOverTexture), gameWonBackground(gameWonTexture);
+    shuffleTexture.loadFromFile("images/NewNodes/Mod/shuffle.png"); // Texture for reshuffle button
+    Sprite background(t1), gameOverBackground(gameOverTexture), gameWonBackground(gameWonTexture), shuffleButton(shuffleTexture);
 
     const Vector2i offset((app.getSize().x - GAME_SIZE * TILE_SIZE) / 2, (app.getSize().y - GAME_SIZE * TILE_SIZE) / 2);
+
+    // Set position and scale for shuffle button
+    const Vector2f shuffleButtonPosition(app.getSize().x - shuffleTexture.getSize().x * 0.5f - 10, 10);
+    const Vector2f shuffleButtonScale(0.25f, 0.25f); 
+    shuffleButton.setPosition(shuffleButtonPosition);
+    shuffleButton.setScale(shuffleButtonScale);
+    shuffleButton.setPosition(225, 75);
 
     // Initialize grid with random tiles
     for (int row = 0; row < GAME_SIZE; row++) {
@@ -126,6 +180,7 @@ int main() {
 
     bool gameOver = false;
     bool gameWon = false;
+    bool isReshuffling = false;
 
     while (app.isOpen()) {
         Event e;
@@ -140,6 +195,7 @@ int main() {
                     restartGame(app, font, movesLeft);
                     gameOver = false;
                     gameWon = false;
+                    isReshuffling = false;
                 }
             }
 
@@ -149,6 +205,12 @@ int main() {
                 if (!isSwap && !isMoving && pos.x > 0 && pos.y > 0 && pos.x < maxFieldSize &&
                     pos.y < maxFieldSize)
                     click++;
+
+                // Check if reshuffle button is clicked
+                if (shuffleButton.getGlobalBounds().contains(static_cast<Vector2f>(Mouse::getPosition(app)))) {
+                    reshuffleGrid();
+                    isReshuffling = true;
+                }
             }
         }
 
@@ -267,6 +329,23 @@ int main() {
             }
         }
 
+        // Reshuffle animation
+        if (isReshuffling) {
+            bool allTilesInPlace = true;
+            for (int row = 0; row < GAME_SIZE; row++) {
+                for (int col = 0; col < GAME_SIZE; col++) {
+                    Tile* p = grid[row][col];
+                    int dx, dy;
+                    dx = p->x - p->col * TILE_SIZE;
+                    dy = p->y - p->row * TILE_SIZE;
+                    if (dx) p->x -= dx / abs(dx);
+                    if (dy) p->y -= dy / abs(dy);
+                    if (dx || dy) allTilesInPlace = false;
+                }
+            }
+            if (allTilesInPlace) isReshuffling = false;
+        }
+
         // Drawing
         app.clear();
         if (gameOver) {
@@ -287,6 +366,7 @@ int main() {
                     app.draw(p->sprite);
                 }
             }
+            app.draw(shuffleButton); // Draw the reshuffle button
         }
 
         if (gameOver) {
@@ -296,33 +376,20 @@ int main() {
             gameOverText.setCharacterSize(50);
             gameOverText.setFillColor(sf::Color::Red);
             gameOverText.setPosition(app.getSize().x / 2 - gameOverText.getLocalBounds().width / 2, app.getSize().y / 2 - gameOverText.getLocalBounds().height / 2);
-
             app.draw(gameOverText);
         }
 
         if (gameWon) {
-            sf::Text winText;
-            winText.setFont(font);
-            winText.setString("You Win! Press 'R' to play again.");
-            winText.setCharacterSize(48);
-            winText.setFillColor(sf::Color::Green);
-            winText.setPosition(app.getSize().x / 2 - winText.getLocalBounds().width / 2, app.getSize().y / 2 - winText.getLocalBounds().height / 2);
-
-            app.draw(winText);
+            sf::Text gameWonText;
+            gameWonText.setFont(font);
+            gameWonText.setString("Congratulations! You won the game. Press 'R' to restart.");
+            gameWonText.setCharacterSize(50);
+            gameWonText.setFillColor(sf::Color::Green);
+            gameWonText.setPosition(app.getSize().x / 2 - gameWonText.getLocalBounds().width / 2, app.getSize().y / 2 - gameWonText.getLocalBounds().height / 2);
+            app.draw(gameWonText);
         }
 
         app.display();
-
-        // Check game state
-        if (movesLeft <= 0 && !gameOver) {
-            gameOver = true;
-            sf::sleep(sf::seconds(3));
-        }
-
-        if (taskManager.isTaskCompleted() && !gameOver) {
-            gameWon = true;
-            sf::sleep(sf::seconds(3));
-        }
     }
 
     return 0;
