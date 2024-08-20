@@ -5,7 +5,7 @@
 #include <string>
 #include <memory>
 
-constexpr int TILE_SIZE = 64; // Tile size
+constexpr int TILE_SIZE = 100; // Tile size
 
 enum class TileType : std::uint_fast8_t {
     Red,

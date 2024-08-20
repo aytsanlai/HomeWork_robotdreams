@@ -5,12 +5,13 @@
 #include <time.h>
 #include <iostream>
 #include "Tile.h"
+#include "TaskManager.h"
 
 using namespace sf;
 
-const Vector2i offset(TILE_SIZE, TILE_SIZE);
 constexpr uint_fast8_t GAME_SIZE = 8;
 Tile* grid[GAME_SIZE][GAME_SIZE];
+TaskManager taskManager;
 
 void swap(Tile* p1, Tile* p2) {
     std::swap(p1->col, p2->col);
@@ -78,7 +79,7 @@ int main() {
     // Moves mechanic
     sf::Font font;
     sf::Text movesText;
-    int movesLeft = 5; // Initial number of moves
+    int movesLeft = 30; // Initial number of moves
 
     if (!font.loadFromFile("Font/BALOO2-SEMIBOLD.TTF")) {
         // error...
@@ -87,11 +88,14 @@ int main() {
 
     movesText.setFont(font);
     movesText.setString("Moves: " + std::to_string(movesLeft));
-    movesText.setCharacterSize(24); // in pixels, not points!
-    movesText.setFillColor(sf::Color::White);
-    movesText.setPosition(10, 10); // Top-left corner
+    movesText.setCharacterSize(50); // in pixels, not points!
+    movesText.setFillColor(sf::Color(131, 83, 83)); // Brown color
+    movesText.setPosition(200, 10); // Top-left corner
 
-    while (app.isOpen() && movesLeft > 0) { // Check if moves are left
+    // Initialize TaskManager
+    taskManager.setTask(TileType::Red, 3, "images/NewNodes/Stage3/FrogP.png");
+
+    while (app.isOpen() && movesLeft > 0 && !taskManager.isTaskCompleted()) { // Check if moves are left
         Event e;
         while (app.pollEvent(e)) {
             if (e.type == Event::Closed)
@@ -137,6 +141,19 @@ int main() {
                 handleMerging(row, col);
             }
 
+        // Check if task is completed
+        int matchCount = 0;
+        for (int row = 0; row < GAME_SIZE; row++) {
+            for (int col = 0; col < GAME_SIZE; col++) {
+                if (grid[row][col]->isMatched && grid[row][col]->getType() == taskManager.getTaskType() && grid[row][col]->level == 3) {
+                    matchCount++;
+                }
+            }
+        }
+        if (matchCount > 0) {
+            taskManager.checkCompletion(taskManager.getTaskType(), matchCount);
+        }
+
         // Moving animation
         isMoving = false;
         for (int row = 0; row < GAME_SIZE; row++) {
@@ -167,17 +184,9 @@ int main() {
             }
         }
 
-        // Get score
-        int score = 0;
-        for (int i = 0; i < GAME_SIZE; i++) {
-            for (int j = 0; j < GAME_SIZE; j++) {
-                score += grid[i][j]->isMatched;
-            }
-        }
-
         // Second swap if no match
         if (isSwap && !isMoving) {
-            if (!score) swap(grid[rowA][colA], grid[rowB][colB]);
+            if (!matchCount) swap(grid[rowA][colA], grid[rowB][colB]);
             isSwap = false;
         }
 
@@ -225,6 +234,7 @@ int main() {
         app.clear();
         app.draw(background);
         app.draw(movesText); // Draw the moves text
+        taskManager.draw(app, font, Vector2f(app.getSize().x - 400, 10)); // Draw the task text and sprite on the right
         for (int row = 0; row < GAME_SIZE; row++) {
             for (int col = 0; col < GAME_SIZE; col++) {
                 Tile* p = grid[row][col];
@@ -242,13 +252,31 @@ int main() {
         sf::Text gameOverText;
         gameOverText.setFont(font);
         gameOverText.setString("Game Over! No moves left.");
-        gameOverText.setCharacterSize(48);
+        gameOverText.setCharacterSize(50);
         gameOverText.setFillColor(sf::Color::Red);
         gameOverText.setPosition(app.getSize().x / 2 - gameOverText.getLocalBounds().width / 2, app.getSize().y / 2 - gameOverText.getLocalBounds().height / 2);
 
         app.clear();
         app.draw(background);
         app.draw(gameOverText);
+        app.display();
+
+        // Wait for a few seconds before closing the window
+        sf::sleep(sf::seconds(3));
+    }
+
+    // If the task is completed, display a win message
+    if (taskManager.isTaskCompleted()) {
+        sf::Text winText;
+        winText.setFont(font);
+        winText.setString("You Win!");
+        winText.setCharacterSize(48);
+        winText.setFillColor(sf::Color::Green);
+        winText.setPosition(app.getSize().x / 2 - winText.getLocalBounds().width / 2, app.getSize().y / 2 - winText.getLocalBounds().height / 2);
+
+        app.clear();
+        app.draw(background);
+        app.draw(winText);
         app.display();
 
         // Wait for a few seconds before closing the window

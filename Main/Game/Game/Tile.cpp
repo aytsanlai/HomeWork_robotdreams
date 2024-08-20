@@ -54,8 +54,7 @@ void Tile::merge() {
     if (level < 3) {
         level++;
         loadTexture(levelToTextureFile());
-    }
-    else {
+    } else {
         isMatched = true; // Mark for deletion
     }
 }
