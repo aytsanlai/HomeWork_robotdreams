@@ -71,9 +71,11 @@ int main() {
     RenderWindow app(VideoMode(1780, 960), "Match-3 Game!");
     app.setFramerateLimit(100);
 
-    Texture t1;
+    Texture t1, gameOverTexture, gameWonTexture;
     t1.loadFromFile("images/background.png");
-    Sprite background(t1);
+    gameOverTexture.loadFromFile("images/game_over_background.png"); // New background for game over
+    gameWonTexture.loadFromFile("images/game_won_background.png"); // New background for game won
+    Sprite background(t1), gameOverBackground(gameOverTexture), gameWonBackground(gameWonTexture);
 
     const Vector2i offset((app.getSize().x - GAME_SIZE * TILE_SIZE) / 2, (app.getSize().y - GAME_SIZE * TILE_SIZE) / 2);
 
@@ -106,7 +108,7 @@ int main() {
     // Moves mechanic
     sf::Font font;
     sf::Text movesText;
-    int movesLeft = 30; // Initial number of moves
+    int movesLeft = 5; // Initial number of moves
 
     if (!font.loadFromFile("Font/BALOO2-SEMIBOLD.TTF")) {
         // error...
@@ -267,7 +269,15 @@ int main() {
 
         // Drawing
         app.clear();
-        app.draw(background);
+        if (gameOver) {
+            app.draw(gameOverBackground);
+        }
+        else if (gameWon) {
+            app.draw(gameWonBackground);
+        }
+        else {
+            app.draw(background);
+        }
         app.draw(movesText); // Draw the moves text
         taskManager.draw(app, font, Vector2f(app.getSize().x - 400, 10)); // Draw the task text and sprite on the right
         for (int row = 0; row < GAME_SIZE; row++) {
