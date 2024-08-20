@@ -38,6 +38,33 @@ void handleMerging(int row, int col) {
     }
 }
 
+void restartGame(RenderWindow& app, Font& font, int& movesLeft) {
+    // Reset game state
+    srand(time(0));
+    for (int row = 0; row < GAME_SIZE; row++) {
+        for (int col = 0; col < GAME_SIZE; col++) {
+            delete grid[row][col];
+            const unsigned int TileType = rand() % 4;
+            switch (TileType) {
+            case 0:
+                grid[row][col] = new RedTile(row, col);
+                break;
+            case 1:
+                grid[row][col] = new BlueTile(row, col);
+                break;
+            case 2:
+                grid[row][col] = new GreenTile(row, col);
+                break;
+            case 3:
+                grid[row][col] = new YellowTile(row, col);
+                break;
+            }
+        }
+    }
+    movesLeft = 30;
+    taskManager.setTask(TileType::Red, 3, "images/NewNodes/Stage3/FrogP.png");
+}
+
 int main() {
     srand(time(0));
 
@@ -95,7 +122,10 @@ int main() {
     // Initialize TaskManager
     taskManager.setTask(TileType::Red, 3, "images/NewNodes/Stage3/FrogP.png");
 
-    while (app.isOpen() && movesLeft > 0 && !taskManager.isTaskCompleted()) { // Check if moves are left
+    bool gameOver = false;
+    bool gameWon = false;
+
+    while (app.isOpen()) {
         Event e;
         while (app.pollEvent(e)) {
             if (e.type == Event::Closed)
@@ -103,6 +133,11 @@ int main() {
             if (e.type == Event::KeyPressed) {
                 if (e.key.code == Keyboard::Escape) {
                     app.close();
+                }
+                if ((gameOver || gameWon) && e.key.code == Keyboard::R) {
+                    restartGame(app, font, movesLeft);
+                    gameOver = false;
+                    gameWon = false;
                 }
             }
 
@@ -244,43 +279,40 @@ int main() {
             }
         }
 
-        app.display();
-    }
+        if (gameOver) {
+            sf::Text gameOverText;
+            gameOverText.setFont(font);
+            gameOverText.setString("Game Over! No moves left. Press 'R' to restart.");
+            gameOverText.setCharacterSize(50);
+            gameOverText.setFillColor(sf::Color::Red);
+            gameOverText.setPosition(app.getSize().x / 2 - gameOverText.getLocalBounds().width / 2, app.getSize().y / 2 - gameOverText.getLocalBounds().height / 2);
 
-    // If the game ends because of no moves left, display a message
-    if (movesLeft <= 0) {
-        sf::Text gameOverText;
-        gameOverText.setFont(font);
-        gameOverText.setString("Game Over! No moves left.");
-        gameOverText.setCharacterSize(50);
-        gameOverText.setFillColor(sf::Color::Red);
-        gameOverText.setPosition(app.getSize().x / 2 - gameOverText.getLocalBounds().width / 2, app.getSize().y / 2 - gameOverText.getLocalBounds().height / 2);
+            app.draw(gameOverText);
+        }
 
-        app.clear();
-        app.draw(background);
-        app.draw(gameOverText);
-        app.display();
+        if (gameWon) {
+            sf::Text winText;
+            winText.setFont(font);
+            winText.setString("You Win! Press 'R' to play again.");
+            winText.setCharacterSize(48);
+            winText.setFillColor(sf::Color::Green);
+            winText.setPosition(app.getSize().x / 2 - winText.getLocalBounds().width / 2, app.getSize().y / 2 - winText.getLocalBounds().height / 2);
 
-        // Wait for a few seconds before closing the window
-        sf::sleep(sf::seconds(3));
-    }
+            app.draw(winText);
+        }
 
-    // If the task is completed, display a win message
-    if (taskManager.isTaskCompleted()) {
-        sf::Text winText;
-        winText.setFont(font);
-        winText.setString("You Win!");
-        winText.setCharacterSize(48);
-        winText.setFillColor(sf::Color::Green);
-        winText.setPosition(app.getSize().x / 2 - winText.getLocalBounds().width / 2, app.getSize().y / 2 - winText.getLocalBounds().height / 2);
-
-        app.clear();
-        app.draw(background);
-        app.draw(winText);
         app.display();
 
-        // Wait for a few seconds before closing the window
-        sf::sleep(sf::seconds(3));
+        // Check game state
+        if (movesLeft <= 0 && !gameOver) {
+            gameOver = true;
+            sf::sleep(sf::seconds(3));
+        }
+
+        if (taskManager.isTaskCompleted() && !gameOver) {
+            gameWon = true;
+            sf::sleep(sf::seconds(3));
+        }
     }
 
     return 0;
