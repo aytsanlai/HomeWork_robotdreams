@@ -47,13 +47,16 @@ void Tile::setSize(int width, int height) {
 }
 
 bool Tile::operator==(const Tile& other) const noexcept {
-    return type == other.type;
+    return type == other.type && level == other.level;
 }
 
 void Tile::merge() {
-    if (level < 2) {
+    if (level < 3) {
         level++;
         loadTexture(levelToTextureFile());
+    }
+    else {
+        isMatched = true; // Mark for deletion
     }
 }
 
@@ -64,16 +67,29 @@ void Tile::animateMerge() {
 std::string Tile::levelToTextureFile() const {
     switch (type) {
     case TileType::Red:
-        return level == 1 ? "images/NewNodes/Stage1/1.png" : "images/NewNodes/Stage2/Frog.png";
+        if (level == 1) return "images/NewNodes/Stage1/1.png";
+        if (level == 2) return "images/NewNodes/Stage2/Frog.png";
+        if (level == 3) return "images/NewNodes/Stage3/FrogP.png";
+        break;
     case TileType::Blue:
-        return level == 1 ? "images/NewNodes/Stage1/3.png" : "images/NewNodes/Stage2/Heart.png";
+        if (level == 1) return "images/NewNodes/Stage1/3.png";
+        if (level == 2) return "images/NewNodes/Stage2/Heart.png";
+        if (level == 3) return "images/NewNodes/Stage3/LoveP.png";
+        break;
     case TileType::Green:
-        return level == 1 ? "images/NewNodes/Stage1/2.png" : "images/NewNodes/Stage2/Moon.png";
+        if (level == 1) return "images/NewNodes/Stage1/2.png";
+        if (level == 2) return "images/NewNodes/Stage2/Moon.png";
+        if (level == 3) return "images/NewNodes/Stage3/SleepP.png";
+        break;
     case TileType::Yellow:
-        return level == 1 ? "images/NewNodes/Stage1/4.png" : "images/NewNodes/Stage2/Mushroom.png";
+        if (level == 1) return "images/NewNodes/Stage1/4.png";
+        if (level == 2) return "images/NewNodes/Stage2/Mushroom.png";
+        if (level == 3) return "images/NewNodes/Stage3/MushroomP.png";
+        break;
     default:
         throw std::runtime_error("Unknown tile type");
     }
+    return "";
 }
 
 // RedTile

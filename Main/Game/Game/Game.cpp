@@ -6,9 +6,9 @@
 
 using namespace sf;
 
-const Vector2i         offset(TILE_SIZE, TILE_SIZE);
+const Vector2i offset(TILE_SIZE, TILE_SIZE);
 constexpr uint_fast8_t GAME_SIZE = 8;
-Tile* grid[8][8];
+Tile* grid[GAME_SIZE][GAME_SIZE];
 
 void swap(Tile* p1, Tile* p2) {
     std::swap(p1->col, p2->col);
@@ -52,26 +52,26 @@ int main() {
         for (int col = 0; col < GAME_SIZE; col++) {
             const unsigned int TileType = rand() % 4;
             switch (TileType) {
-                case 0:
-                    grid[row][col] = new RedTile(row, col);
-                    break;
-                case 1:
-                    grid[row][col] = new BlueTile(row, col);
-                    break;
-                case 2:
-                    grid[row][col] = new GreenTile(row, col);
-                    break;
-                case 3:
-                    grid[row][col] = new YellowTile(row, col);
-                    break;
+            case 0:
+                grid[row][col] = new RedTile(row, col);
+                break;
+            case 1:
+                grid[row][col] = new BlueTile(row, col);
+                break;
+            case 2:
+                grid[row][col] = new GreenTile(row, col);
+                break;
+            case 3:
+                grid[row][col] = new YellowTile(row, col);
+                break;
             }
         }
     }
 
-    int      colA, rowA, colB, rowB;
-    int      click  = 0;
+    int colA, rowA, colB, rowB;
+    int click = 0;
     Vector2i pos;
-    bool     isSwap = false, isMoving = false;
+    bool isSwap = false, isMoving = false;
 
     while (app.isOpen()) {
         Event e;
@@ -97,14 +97,16 @@ int main() {
         if (click == 1) {
             colA = pos.x / TILE_SIZE;
             rowA = pos.y / TILE_SIZE;
-        } else if (click == 2) {
+        }
+        else if (click == 2) {
             colB = pos.x / TILE_SIZE;
             rowB = pos.y / TILE_SIZE;
             if (abs(colB - colA) + abs(rowB - rowA) == 1) {
                 swap(grid[rowA][colA], grid[rowB][colB]);
                 isSwap = true;
-                click  = 0;
-            } else {
+                click = 0;
+            }
+            else {
                 click = 1;
             }
         }
@@ -120,7 +122,7 @@ int main() {
         for (int row = 0; row < GAME_SIZE; row++) {
             for (int col = 0; col < GAME_SIZE; col++) {
                 Tile* p = grid[row][col];
-                int      dx, dy;
+                int dx, dy;
                 for (int n = 0; n < 4; n++) { // 4 - speed
                     dx = p->x - p->col * TILE_SIZE;
                     dy = p->y - p->row * TILE_SIZE;
@@ -146,8 +148,8 @@ int main() {
         }
 
         // Get score
-        int      score = 0;
-        for (int i     = 0; i < GAME_SIZE; i++) {
+        int score = 0;
+        for (int i = 0; i < GAME_SIZE; i++) {
             for (int j = 0; j < GAME_SIZE; j++) {
                 score += grid[i][j]->isMatched;
             }
@@ -180,18 +182,18 @@ int main() {
                     if (grid[row][col]->isMatched) {
                         const unsigned int gemType = rand() % 4;
                         switch (gemType) {
-                            case 0:
-                                grid[row][col] = new RedTile(row, col);
-                                break;
-                            case 1:
-                                grid[row][col] = new BlueTile(row, col);
-                                break;
-                            case 2:
-                                grid[row][col] = new GreenTile(row, col);
-                                break;
-                            case 3:
-                                grid[row][col] = new YellowTile(row, col);
-                                break;
+                        case 0:
+                            grid[row][col] = new RedTile(row, col);
+                            break;
+                        case 1:
+                            grid[row][col] = new BlueTile(row, col);
+                            break;
+                        case 2:
+                            grid[row][col] = new GreenTile(row, col);
+                            break;
+                        case 3:
+                            grid[row][col] = new YellowTile(row, col);
+                            break;
                         }
                         grid[row][col]->y = -TILE_SIZE * (GAME_SIZE - row);
                     }
@@ -213,6 +215,5 @@ int main() {
 
         app.display();
     }
-
     return 0;
 }
